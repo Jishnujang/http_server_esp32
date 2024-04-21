@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Fridge Controller</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f5f5f5;
+      }
+      .content-container {
+        padding-top: 50px; /* Adjust the top padding to move content down */
+      }
+      h1 {
+        margin-top: 0;
+      }
+      .switch-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+      }
+      .switch-label {
+        margin-right: 10px;
+      }
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background-color: #2196f3;
+      }
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
+      .slider.round {
+        border-radius: 34px;
+      }
+      .slider.round:before {
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content-container">
+      <h1>Smart Fridge</h1>
+      <div><p>Clean the water</p></div>
+
+      <div class="switch-container">
+        <span class="switch-label">OFF</span>
+        <label class="switch">
+          <input type="checkbox" id="fridgeSwitch" />
+          <span class="slider round"></span>
+        </label>
+        <span class="switch-label">ON</span>
+      </div>
+    </div>
+
+    <script>
+      const fridgeSwitch = document.getElementById("fridgeSwitch");
+
+      // Function to send POST request to ESP32 server
+      function sendFridgeState(state) {
+        const url = "/offandon"; // Update with your ESP32 server URL
+
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ state: state }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Response from server:", data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+
+      // Event listener for switch toggle
+      fridgeSwitch.addEventListener("change", (event) => {
+        const isChecked = event.target.checked;
+        const newState = isChecked ? "on" : "off";
+
+        sendFridgeState(newState);
+      });
+    </script>
+  </body>
+</html>
